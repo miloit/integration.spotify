@@ -39,7 +39,9 @@ Integration* SpotifyPlugin::createIntegration(const QVariantMap& config, Entitie
 Spotify::Spotify(const QVariantMap& config, EntitiesInterface* entities, NotificationsInterface* notifications,
                  YioAPIInterface* api, ConfigInterface* configObj, Plugin* plugin)
     : Integration(config, entities, notifications, api, configObj, plugin),
-    m_album() {
+    m_albumBrowseModel(),
+    m_playlistBrowseModel(),
+    m_userPlaylistBrowseModel() {
     for (QVariantMap::const_iterator iter = config.begin(); iter != config.end(); ++iter) {
         if (iter.key() == Integration::OBJ_DATA) {
             QVariantMap map = iter.value().toMap();
@@ -399,23 +401,23 @@ void Spotify::getAlbum(QString id) {
             QStringList commands = {"PLAY", "SONGRADIO", "QUEUE"};
 
             //Since we reuse BrowseModel we need to clear former items
-            m_album.clearItems();
+            m_albumBrowseModel.clearItems();
 
             //Since we reuse BrowseModel we need to clear former properties
-            m_album.clearProperties();
+            m_albumBrowseModel.clearProperties();
 
             //Now set properties
-            m_album.setId(id);
-            m_album.setTitle(title);
-            m_album.setSubtitle(subtitle);
-            m_album.setType(type);
-            m_album.setImageUrl(image);
-            m_album.setCommands(commands);
+            m_albumBrowseModel.setId(id);
+            m_albumBrowseModel.setTitle(title);
+            m_albumBrowseModel.setSubtitle(subtitle);
+            m_albumBrowseModel.setType(type);
+            m_albumBrowseModel.setImageUrl(image);
+            m_albumBrowseModel.setCommands(commands);
 
             // add tracks to album
             QVariantList tracks = map.value("tracks").toMap().value("items").toList();
             for (int i = 0; i < tracks.length(); i++) {
-                m_album.addItem(tracks[i].toMap().value("id").toString(), tracks[i].toMap().value("name").toString(),
+                m_albumBrowseModel.addItem(tracks[i].toMap().value("id").toString(), tracks[i].toMap().value("name").toString(),
                                tracks[i].toMap().value("artists").toList()[0].toMap().value("name").toString(), "track",
                                "", commands);
             }
@@ -424,7 +426,7 @@ void Spotify::getAlbum(QString id) {
             EntityInterface* entity = static_cast<EntityInterface*>(m_entities->getEntityInterface(m_entityId));
             if (entity) {
                 MediaPlayerInterface* me = static_cast<MediaPlayerInterface*>(entity->getSpecificInterface());
-                me->setBrowseModel(&m_album);
+                me->setBrowseModel(&m_albumBrowseModel);
             }
         }
         context->deleteLater();
@@ -460,23 +462,23 @@ void Spotify::getPlaylist(QString id) {
             QStringList commands = {"PLAY", "SONGRADIO", "QUEUE"};
 
             //Since we reuse BrowseModel we need to clear former items
-            m_album.clearItems();
+            m_playlistBrowseModel.clearItems();
 
             //Since we reuse BrowseModel we need to clear former properties
-            m_album.clearProperties();
+            m_playlistBrowseModel.clearProperties();
 
             //Now set properties
-            m_album.setId(id);
-            m_album.setTitle(title);
-            m_album.setSubtitle(subtitle);
-            m_album.setType(type);
-            m_album.setImageUrl(image);
-            m_album.setCommands(commands);
+            m_playlistBrowseModel.setId(id);
+            m_playlistBrowseModel.setTitle(title);
+            m_playlistBrowseModel.setSubtitle(subtitle);
+            m_playlistBrowseModel.setType(type);
+            m_playlistBrowseModel.setImageUrl(image);
+            m_playlistBrowseModel.setCommands(commands);
 
             // add tracks to playlist
             QVariantList tracks = map.value("tracks").toMap().value("items").toList();
             for (int i = 0; i < tracks.length(); i++) {
-                m_album.addItem(tracks[i].toMap().value("track").toMap().value("id").toString(),
+                m_playlistBrowseModel.addItem(tracks[i].toMap().value("track").toMap().value("id").toString(),
                                tracks[i].toMap().value("track").toMap().value("name").toString(),
                                tracks[i]
                                    .toMap()
@@ -494,7 +496,7 @@ void Spotify::getPlaylist(QString id) {
             EntityInterface* entity = static_cast<EntityInterface*>(m_entities->getEntityInterface(m_entityId));
             if (entity) {
                 MediaPlayerInterface* me = static_cast<MediaPlayerInterface*>(entity->getSpecificInterface());
-                me->setBrowseModel(&m_album);
+                me->setBrowseModel(&m_playlistBrowseModel);
             }
         }
         context->deleteLater();
@@ -518,18 +520,18 @@ void Spotify::getUserPlaylists() {
             QStringList commands = {};
 
             //Since we reuse BrowseModel we need to clear former items
-            m_album.clearItems();
+            m_userPlaylistBrowseModel.clearItems();
 
             //Since we reuse BrowseModel we need to clear former properties
-            m_album.clearProperties();
+            m_userPlaylistBrowseModel.clearProperties();
 
             //Now set properties
-            m_album.setId(id);
-            m_album.setTitle(title);
-            m_album.setSubtitle(subtitle);
-            m_album.setType(type);
-            m_album.setImageUrl(image);
-            m_album.setCommands(commands);
+            m_userPlaylistBrowseModel.setId(id);
+            m_userPlaylistBrowseModel.setTitle(title);
+            m_userPlaylistBrowseModel.setSubtitle(subtitle);
+            m_userPlaylistBrowseModel.setType(type);
+            m_userPlaylistBrowseModel.setImageUrl(image);
+            m_userPlaylistBrowseModel.setCommands(commands);
 
             // add playlists to model
             QVariantList playlists = map.value("items").toList();
@@ -550,7 +552,7 @@ void Spotify::getUserPlaylists() {
                 }
 
                 QStringList commands = {"PLAY", "PLAYLISTRADIO"};
-                m_album.addItem(playlists[i].toMap().value("id").toString(),
+                m_userPlaylistBrowseModel.addItem(playlists[i].toMap().value("id").toString(),
                                playlists[i].toMap().value("name").toString(), "", type, image, commands);
             }
 
@@ -558,7 +560,7 @@ void Spotify::getUserPlaylists() {
             EntityInterface* entity = static_cast<EntityInterface*>(m_entities->getEntityInterface(m_entityId));
             if (entity) {
                 MediaPlayerInterface* me = static_cast<MediaPlayerInterface*>(entity->getSpecificInterface());
-                me->setBrowseModel(&m_album);
+                me->setBrowseModel(&m_userPlaylistBrowseModel);
             }
         }
         context->deleteLater();
