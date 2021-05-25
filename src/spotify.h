@@ -126,4 +126,7 @@ class Spotify : public Integration {
     int     m_tokenExpire = 0;  // in seconds
     QTimer* m_tokenTimeOutTimer;
     QString m_apiURL = "https://api.spotify.com";
+    BrowseModel m_albumBrowseModel;
+        BrowseModel m_playlistBrowseModel;
+        BrowseModel m_userPlaylistBrowseModel;
 };
