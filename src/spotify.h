@@ -128,7 +128,20 @@ class Spotify : public Integration {
     QString m_apiURL = "https://api.spotify.com";
 
     //Needs to be created in main thread, not in worker thread
-    BrowseModel m_albumBrowseModel;
-    BrowseModel m_playlistBrowseModel;
-    BrowseModel m_userPlaylistBrowseModel;
+    BrowseModel m_albumBrowseModel1;
+    BrowseModel m_albumBrowseModel2;
+    //Placeholder only
+    BrowseModel *m_albumBrowseModel;
+
+    //Needs to be created in main thread, not in worker thread
+    BrowseModel m_playlistBrowseModel1;
+    BrowseModel m_playlistBrowseModel2;
+    //Placeholder only
+    BrowseModel *m_playlistBrowseModel;
+
+    //Needs to be created in main thread, not in worker thread
+    BrowseModel m_userPlaylistBrowseModel1;
+    BrowseModel m_userPlaylistBrowseModel2;
+    //Placeholder only
+    BrowseModel *m_userPlaylistBrowseModel;
 };
